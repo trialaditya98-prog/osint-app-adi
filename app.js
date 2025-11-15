@@ -93,22 +93,52 @@ async function lookupPhone() {
             return;
         }
         
-        const response = await fetchWithFallback(
-            APIS.phone.url + phone,
-            APIS.phone.corsProxy
-        );
-        
-        const data = await response.json();
-        
-        if (data.success || data.data) {
-            cacheResult('phone', phone, data);
-            displayPhoneResult(resultDiv, data);
+        try {
+            const response = await fetchWithFallback(
+                APIS.phone.url + phone,
+                APIS.phone.corsProxy
+            );
+            
+            const data = await response.json();
+            
+            if (data.success || data.data) {
+                cacheResult('phone', phone, data);
+                displayPhoneResult(resultDiv, data);
+                addToHistory('Phone', phone);
+            } else {
+                throw new Error(data.message || 'Phone number not found');
+            }
+        } catch (apiError) {
+            // Provide demo/fallback data
+            console.log('Using demo data due to API error');
+            const demoData = {
+                phone: phone,
+                operator: 'Jio / Airtel / Vodafone',
+                circle: 'Maharashtra',
+                type: 'Prepaid',
+                status: 'Active',
+                country: 'India',
+                demo: true
+            };
+            
+            resultDiv.innerHTML = `
+                <div class="error-box mt-4" style="background: #ffe6e6; border-left: 4px solid #ff9800; padding: 12px; border-radius: 4px; color: #e65100;">
+                    <i class="fas fa-info-circle"></i> API currently unavailable - showing demo data
+                </div>
+                <div class="result-card mt-4">
+                    <div class="info-row"><span class="info-label">Phone:</span><span class="info-value">${demoData.phone}</span></div>
+                    <div class="info-row"><span class="info-label">Operator:</span><span class="info-value">${demoData.operator}</span></div>
+                    <div class="info-row"><span class="info-label">Circle:</span><span class="info-value">${demoData.circle}</span></div>
+                    <div class="info-row"><span class="info-label">Type:</span><span class="info-value">${demoData.type}</span></div>
+                    <div class="info-row"><span class="info-label">Status:</span><span class="info-value">${demoData.status}</span></div>
+                    <div class="info-row"><span class="info-label">Country:</span><span class="info-value">${demoData.country}</span></div>
+                </div>
+            `;
+            
             addToHistory('Phone', phone);
-        } else {
-            showError(resultDiv, data.message || 'Phone number not found');
         }
     } catch (error) {
-        showError(resultDiv, 'Error fetching phone data: ' + error.message);
+        showError(resultDiv, '⚠️ Error: ' + error.message + ' - Try other features or refresh page');
     }
 }
 
@@ -137,22 +167,56 @@ async function lookupVehicle() {
             return;
         }
         
-        const response = await fetchWithFallback(
-            APIS.vehicle.url + rcNumber,
-            APIS.vehicle.corsProxy
-        );
-        
-        const data = await response.json();
-        
-        if (data.success || data.data || Object.keys(data).length > 0) {
-            cacheResult('vehicle', rcNumber, data);
-            displayVehicleResult(resultDiv, data);
+        try {
+            const response = await fetchWithFallback(
+                APIS.vehicle.url + rcNumber,
+                APIS.vehicle.corsProxy
+            );
+            
+            const data = await response.json();
+            
+            if (data.success || data.data || Object.keys(data).length > 0) {
+                cacheResult('vehicle', rcNumber, data);
+                displayVehicleResult(resultDiv, data);
+                addToHistory('Vehicle', rcNumber);
+            } else {
+                throw new Error('Vehicle information not found');
+            }
+        } catch (apiError) {
+            // Demo data for vehicle
+            const demoData = {
+                rc_number: rcNumber,
+                owner_name: 'Vehicle Owner Name',
+                vehicle_type: 'Two Wheeler / Four Wheeler',
+                maker_model: 'Vehicle Make & Model',
+                registration_date: '2020-01-15',
+                fuel_type: 'Petrol / Diesel',
+                color: 'White / Black / Silver',
+                chasis_number: 'CH123456789ABCDEF',
+                engine_number: 'EN123456789ABCDEF'
+            };
+            
+            resultDiv.innerHTML = `
+                <div class="error-box mt-4" style="background: #ffe6e6; border-left: 4px solid #ff9800; padding: 12px; border-radius: 4px; color: #e65100;">
+                    <i class="fas fa-info-circle"></i> API currently unavailable - showing demo data
+                </div>
+                <div class="result-card mt-4">
+                    <div class="info-row"><span class="info-label">RC Number:</span><span class="info-value">${demoData.rc_number}</span></div>
+                    <div class="info-row"><span class="info-label">Owner:</span><span class="info-value">${demoData.owner_name}</span></div>
+                    <div class="info-row"><span class="info-label">Vehicle Type:</span><span class="info-value">${demoData.vehicle_type}</span></div>
+                    <div class="info-row"><span class="info-label">Model:</span><span class="info-value">${demoData.maker_model}</span></div>
+                    <div class="info-row"><span class="info-label">Registration Date:</span><span class="info-value">${demoData.registration_date}</span></div>
+                    <div class="info-row"><span class="info-label">Fuel Type:</span><span class="info-value">${demoData.fuel_type}</span></div>
+                    <div class="info-row"><span class="info-label">Color:</span><span class="info-value">${demoData.color}</span></div>
+                    <div class="info-row"><span class="info-label">Chassis:</span><span class="info-value">${demoData.chasis_number}</span></div>
+                    <div class="info-row"><span class="info-label">Engine:</span><span class="info-value">${demoData.engine_number}</span></div>
+                </div>
+            `;
+            
             addToHistory('Vehicle', rcNumber);
-        } else {
-            showError(resultDiv, 'Vehicle information not found');
         }
     } catch (error) {
-        showError(resultDiv, 'Error fetching vehicle data: ' + error.message);
+        showError(resultDiv, '⚠️ Error: ' + error.message);
     }
 }
 
@@ -181,22 +245,55 @@ async function lookupAadhaar() {
             return;
         }
         
-        const response = await fetchWithFallback(
-            APIS.aadhaar.url + aadhaar,
-            APIS.aadhaar.corsProxy
-        );
-        
-        const data = await response.json();
-        
-        if (data.success || data.data || Object.keys(data).length > 0) {
-            cacheResult('aadhaar', aadhaar, data);
-            displayAadhaarResult(resultDiv, data);
+        try {
+            const response = await fetchWithFallback(
+                APIS.aadhaar.url + aadhaar,
+                APIS.aadhaar.corsProxy
+            );
+            
+            const data = await response.json();
+            
+            if (data.success || data.data || Object.keys(data).length > 0) {
+                cacheResult('aadhaar', aadhaar, data);
+                displayAadhaarResult(resultDiv, data);
+                addToHistory('Aadhaar', aadhaar.slice(-4).padStart(12, '*'));
+            } else {
+                throw new Error('Aadhaar information not found');
+            }
+        } catch (apiError) {
+            // Demo data for Aadhaar
+            const demoData = {
+                name: 'Person Name',
+                gender: 'Male / Female',
+                dob: '1990-01-15',
+                aadhaar: aadhaar.slice(-4).padStart(12, '*'),
+                address: 'Your Address',
+                state: 'Maharashtra / Gujarat / Punjab',
+                district: 'District Name',
+                phone: '+91-XXXXXXXXXX',
+                email: 'email@example.com'
+            };
+            
+            resultDiv.innerHTML = `
+                <div class="error-box mt-4" style="background: #ffe6e6; border-left: 4px solid #ff9800; padding: 12px; border-radius: 4px; color: #e65100;">
+                    <i class="fas fa-info-circle"></i> API currently unavailable - showing demo data
+                </div>
+                <div class="result-card mt-4">
+                    <div class="info-row"><span class="info-label">Name:</span><span class="info-value">${demoData.name}</span></div>
+                    <div class="info-row"><span class="info-label">Gender:</span><span class="info-value">${demoData.gender}</span></div>
+                    <div class="info-row"><span class="info-label">DOB:</span><span class="info-value">${demoData.dob}</span></div>
+                    <div class="info-row"><span class="info-label">Address:</span><span class="info-value">${demoData.address}</span></div>
+                    <div class="info-row"><span class="info-label">State:</span><span class="info-value">${demoData.state}</span></div>
+                    <div class="info-row"><span class="info-label">District:</span><span class="info-value">${demoData.district}</span></div>
+                    <div class="info-row"><span class="info-label">Phone:</span><span class="info-value">${demoData.phone}</span></div>
+                    <div class="info-row"><span class="info-label">Email:</span><span class="info-value">${demoData.email}</span></div>
+                </div>
+            `;
+            
             addToHistory('Aadhaar', aadhaar.slice(-4).padStart(12, '*'));
-        } else {
-            showError(resultDiv, 'Aadhaar information not found');
         }
     } catch (error) {
-        showError(resultDiv, 'Error fetching Aadhaar data: ' + error.message);
+        showError(resultDiv, '⚠️ Error: ' + error.message);
     }
 }
 
@@ -361,45 +458,74 @@ function luhnCheck(cardNumber) {
     return (sum % 10) === 0;
 }
 
-// Fetch with CORS proxy fallback
+// Fetch with multiple CORS proxy fallbacks
 async function fetchWithFallback(url, corsProxy, timeout = 15000) {
     const abortSignal = AbortSignal.timeout(timeout);
     
+    // List of CORS proxies to try in order
+    const corsProxies = [
+        'https://cors-anywhere.herokuapp.com/',
+        'https://api.allorigins.win/raw?url=',
+        'https://cors-api.herokuapp.com/',
+        'https://corsproxy.io/?',
+    ];
+    
+    // Try direct fetch first
     try {
-        // Try direct fetch first
         const response = await fetch(url, {
             headers: {
                 'Accept': 'application/json',
+                'User-Agent': 'Mozilla/5.0'
             },
-            signal: abortSignal
+            signal: abortSignal,
+            mode: 'cors'
         });
         
         if (response.ok) {
+            console.log('✅ Direct fetch succeeded');
             return response;
         }
-        
-        // If direct fails, try with CORS proxy
-        throw new Error('Direct fetch failed');
     } catch (error) {
+        console.log('⚠️ Direct fetch failed, trying CORS proxies...');
+    }
+    
+    // Try each CORS proxy
+    for (let proxy of corsProxies) {
         try {
-            // Try with CORS proxy
-            const proxyUrl = corsProxy + url;
+            let proxyUrl;
+            
+            if (proxy.includes('?')) {
+                // For proxies that use query parameter
+                proxyUrl = proxy + encodeURIComponent(url);
+            } else {
+                // For proxies that use path
+                proxyUrl = proxy + url;
+            }
+            
+            console.log(`Trying proxy: ${proxy}`);
+            
             const response = await fetch(proxyUrl, {
                 headers: {
                     'Accept': 'application/json',
+                    'User-Agent': 'Mozilla/5.0'
                 },
-                signal: abortSignal
+                signal: abortSignal,
+                mode: 'cors'
             });
             
             if (response.ok) {
+                console.log(`✅ CORS proxy succeeded: ${proxy}`);
                 return response;
             }
-            
-            throw new Error('CORS proxy fetch failed');
-        } catch (proxyError) {
-            throw new Error('Failed to fetch data from both direct and proxy: ' + error.message);
+        } catch (error) {
+            console.log(`❌ Proxy failed: ${proxy} - ${error.message}`);
+            continue;
         }
     }
+    
+    // If all proxies fail, return demo data for testing
+    console.log('⚠️ All proxies failed, using demo data');
+    throw new Error('All CORS proxies exhausted. Using demo mode.');
 }
 
 // Display Results
